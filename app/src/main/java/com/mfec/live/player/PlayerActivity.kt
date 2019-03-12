@@ -12,6 +12,7 @@ import com.mfec.live.live.model.LiveStreamsModel
 import com.wowza.gocoder.sdk.api.WowzaGoCoder
 import com.wowza.gocoder.sdk.api.broadcast.WOWZBroadcastConfig
 import com.wowza.gocoder.sdk.api.configuration.WOWZMediaConfig
+import com.wowza.gocoder.sdk.api.geometry.WOWZSize
 import com.wowza.gocoder.sdk.api.player.WOWZPlayerConfig
 import com.wowza.gocoder.sdk.api.status.WOWZState
 import com.wowza.gocoder.sdk.api.status.WOWZStatus
@@ -28,79 +29,55 @@ class PlayerActivity : AppCompatActivity(), WOWZStatusCallback {
 
         when (goCoderStatus!!.state) {
             WOWZState.STARTING -> {
-                statusMessage.append("Broadcast initialization")
+//                Handler().postDelayed({
+                runOnUiThread {
+                    tx1.text = "เริ่มทำการเชื่อมต่อ"
+                }
+//                }, 200)
             }
 
-            WOWZState.READY -> statusMessage.append("Ready to begin streaming")
+            WOWZState.READY -> {
+//                Handler().postDelayed({
+                runOnUiThread {
+                    tx1.text = "กำลังเชื่อมต่อ"
+                }
+//                }, 200)
+            }
 
-            WOWZState.RUNNING -> statusMessage.append("Streaming is active")
+            WOWZState.RUNNING -> {
+//                Handler().postDelayed({
+                runOnUiThread {
+                    tx1.text = "เชื่อมต่อสำเร็จ"
+                }
+//                }, 200)
+            }
 
             WOWZState.STOPPING -> {
-                statusMessage.append("Broadcast shutting down")
+//                Handler().postDelayed({
+                runOnUiThread {
+                    tx1.text = "หยุด"
+                }
+//                }, 200)
             }
 
-            WOWZState.IDLE -> statusMessage.append("The broadcast is stopped")
+            WOWZState.IDLE -> {
+//                Handler().postDelayed({
+                runOnUiThread {
+                    tx1.text = "ยังไม่มี Live นะจ้ะ"
+                }
+//                }, 200)
+            }
 
             else -> return
         }
-//        when (goCoderStatus!!.state) {
-//            WOWZState.STARTING -> {
-//                Log.wtf("ggwprr", statusMessage.toString())
-//                this@PlayerActivity.tx.visibility = View.VISIBLE
-//                this@PlayerActivity.tx.text = "กำลังเชื่อมต่อ"
-//            }
-//            WOWZState.READY -> {
-//
-//            }
-//            WOWZState.RUNNING -> {
-//                this@PlayerActivity.tx.visibility = View.VISIBLE
-//                this@PlayerActivity.tx.text = "เชื่อมต่อสำเร็จ"
-//                this@PlayerActivity.tx.visibility = View.GONE
-//            }
-//            WOWZState.STOPPING -> {
-//                this@PlayerActivity.tx.visibility = View.VISIBLE
-//                this@PlayerActivity.tx.text = "หยุด live"
-//            }
-//            WOWZState.IDLE -> {
-//                this@PlayerActivity.tx.visibility = View.VISIBLE
-//                this@PlayerActivity.tx.text = "ยังไม่มี live"
-//            }
-//        }
         // Display the status message using the U/I thread
-        Handler(Looper.getMainLooper()).post(Runnable {
-            Toast.makeText(
-                this@PlayerActivity,
-                statusMessage,
-                Toast.LENGTH_LONG
-            ).show()
-
-        })
-        // A successful status transition has been reported by the GoCoder SDK
-//        var statusMessage = 0
 //        Handler(Looper.getMainLooper()).post(Runnable {
-//            when (goCoderStatus!!.state) {
-//                WOWZState.STARTING -> {
-//                    Log.wtf("ggwprr", statusMessage.toString())
-//                    this@PlayerActivity.tx.visibility = View.VISIBLE
-//                    this@PlayerActivity.tx.text = "กำลังเชื่อมต่อ"
-//                }
-//                WOWZState.READY  -> {
+//            Toast.makeText(
+//                this@PlayerActivity,
+//                statusMessage,
+//                Toast.LENGTH_LONG
+//            ).show()
 //
-//                }
-//                WOWZState.RUNNING -> {
-//                    this@PlayerActivity.tx.visibility = View.VISIBLE
-//                    this@PlayerActivity.tx.text = "เชื่อมต่อสำเร็จ"
-//                    this@PlayerActivity.tx.visibility = View.GONE
-//                }
-//                WOWZState.STOPPING -> {
-//                    this@PlayerActivity.tx.visibility = View.VISIBLE
-//                    this@PlayerActivity.tx.text = "หยุด live"
-//                }
-//                WOWZState.IDLE -> {
-//                    this@PlayerActivity.tx.visibility = View.VISIBLE
-//                    this@PlayerActivity.tx.text = "ยังไม่มี live"
-//                }
-//            }
 //        })
     }
 
@@ -135,6 +112,22 @@ class PlayerActivity : AppCompatActivity(), WOWZStatusCallback {
 
     }
 
+    //
+    // Enable Android's immersive, sticky full-screen mode
+    //
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+
+        val rootView = window.decorView.findViewById<View>(android.R.id.content)
+        if (rootView != null)
+            rootView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+    }
+
     private fun initInstance() {
         intent.getParcelableExtra<LiveStreamsModel>("ListLive")?.let {
             listLive = it
@@ -142,6 +135,7 @@ class PlayerActivity : AppCompatActivity(), WOWZStatusCallback {
         val mStreamPlayerView = vwStreamPlayer
         var mStreamPlayerConfig = WOWZPlayerConfig()
         val goCoderStatus: WOWZStatus? = null
+
         mStreamPlayerConfig.isPlayback = false
         mStreamPlayerConfig.hostAddress = listLive.source_connection_information.primary_server
         mStreamPlayerConfig.applicationName = listLive.source_connection_information.application
@@ -150,17 +144,19 @@ class PlayerActivity : AppCompatActivity(), WOWZStatusCallback {
         mStreamPlayerConfig.isHLSEnabled = false
         mStreamPlayerConfig.isAudioEnabled = true
         mStreamPlayerConfig.isVideoEnabled = true
-//        mStreamPlayerView.scaleMode = WOWZPlayerConfig.FILL_VIEW
+//        mStreamPlayerConfig.videoFrameSize = WOWZSize(720,1208)
+//        mStreamPlayerView.streamConfig.videoFrameWidth = 720
+//        mStreamPlayerView.streamConfig.videoFrameWidth = 1208
         mStreamPlayerView.volume = 3
 //         WOWZMediaConfig.FILL_VIEW : WOWZMediaConfig.RESIZE_TO_ASPECT;
-        mStreamPlayerView.scaleMode = WOWZMediaConfig.DEFAULT_SCALE_MODE
-//        Handler().postDelayed({
-//            mStreamPlayerView.play(mStreamPlayerConfig, this)
-//        }, 200)
-        tx.setOnClickListener {
-            Handler().postDelayed({
-                mStreamPlayerView.play(mStreamPlayerConfig, this)
-            }, 200)
-        }
+//        mStreamPlayerView.scaleMode = WOWZMediaConfig.FILL_VIEW
+        Handler().postDelayed({
+            mStreamPlayerView.play(mStreamPlayerConfig, this)
+        }, 200)
+//        tx.setOnClickListener {
+//            Handler().postDelayed({
+//                mStreamPlayerView.play(mStreamPlayerConfig, this)
+//            }, 200)
+//        }
     }
 }

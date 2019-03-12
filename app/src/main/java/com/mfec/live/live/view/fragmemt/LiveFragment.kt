@@ -87,9 +87,11 @@ class LiveFragment : Fragment() {
     }
 
     private fun loadListLive() {
+        progressBar.visibility = View.VISIBLE
         liveViewModel.getListWowza(this.context!!).observe(this, Observer {
             it?.let { liveModel ->
                 liveAdapter.setLiveList(liveModel.content)
+                progressBar.visibility = View.GONE
             }
         })
     }

@@ -74,16 +74,6 @@ class LiveActivity : AppCompatActivity(), WOWZStatusCallback {
             ).show()
             return
         }
-
-        // Associate the WOWZCameraView defined in the U/I layout with the corresponding class member
-        goCoderCameraView = camera_preview as WOWZCameraView
-
-        // Create an audio device instance for capturing and broadcasting audio
-        goCoderAudioDevice = WOWZAudioDevice()
-        // Create a broadcaster instance
-        goCoderBroadcaster = WOWZBroadcast()
-
-
         btnStartLive.setOnClickListener {
             // return if the user hasn't granted the app the necessary permissions
 //            if (!mPermissionsGranted) return
@@ -158,30 +148,45 @@ class LiveActivity : AppCompatActivity(), WOWZStatusCallback {
     }
 
     private fun initInstance() {
+
+        intent.getParcelableExtra<LiveStreamsModel>("ListLive")?.let {
+            listLive = it
+        }
+
+        // Associate the WOWZCameraView defined in the U/I layout with the corresponding class member
+        goCoderCameraView = camera_preview as WOWZCameraView
+
+        // Create an audio device instance for capturing and broadcasting audio
+        goCoderAudioDevice = WOWZAudioDevice()
+        // Create a broadcaster instance
+        goCoderBroadcaster = WOWZBroadcast()
         val display = windowManager.defaultDisplay
         val size = Point()
         display.getSize(size)
         val width = size.x
         val height = size.y
-        goCoderCameraView!!.setFrameSize(width,height)
-        Log.wtf("defaultDisplay1", String.format("width : %s,height : %s", width, height))
-        Log.wtf("defaultDisplay", goCoderCameraView!!.frameSize.toString())
-        intent.getParcelableExtra<LiveStreamsModel>("ListLive")?.let {
-            listLive = it
-        }
+        var mConfig: WOWZMediaConfig = WOWZMediaConfig()
+        mConfig.videoFrameSize =
+            WOWZSize(width, height)
         // Create a configuration instance for the broadcaster
-        goCoderBroadcastConfig = WOWZBroadcastConfig(WOWZMediaConfig.FRAME_SIZE_1280x720)
-
+        goCoderBroadcastConfig = WOWZBroadcastConfig(mConfig)
+        goCoderCameraView!!.frameSize =
+            WOWZSize(width, height)
         // Set the connection properties for the target Wowza Streaming Engine server or Wowza Streaming Cloud live stream
         goCoderBroadcastConfig!!.hostAddress = listLive.source_connection_information.primary_server
         goCoderBroadcastConfig!!.portNumber = listLive.source_connection_information.host_port
         goCoderBroadcastConfig!!.applicationName = listLive.source_connection_information.application
         goCoderBroadcastConfig!!.streamName = listLive.source_connection_information.stream_name
+        goCoderCameraView!!.setCameraConfig(goCoderBroadcastConfig)
+        
+        mConfig.videoFrameSize =
+            WOWZSize(goCoderBroadcastConfig!!.videoFrameWidth, goCoderBroadcastConfig!!.videoFrameHeight)
         // Designate the camera preview as the video source
         goCoderBroadcastConfig!!.videoBroadcaster = goCoderCameraView
-
+//        goCoderBroadcastConfig!!.videoSourceConfig = mConfig
         // Designate the audio device as the audio broadcaster
         goCoderBroadcastConfig!!.audioBroadcaster = goCoderAudioDevice
+
     }
 
     //

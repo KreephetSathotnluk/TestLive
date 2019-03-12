@@ -4,17 +4,10 @@
         xmlns:tools="http://schemas.android.com/tools"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-
         android:layout_height="match_parent"
         tools:context=".player.PlayerActivity">
-    <TextView
-            android:id="@+id/tx1"
-            android:textSize="25sp"
-            android:text="fdsff"
-            android:visibility="gone"
-            android:layout_centerInParent="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+
+
     <com.wowza.gocoder.sdk.api.player.WOWZPlayerView
             android:layout_alignParentStart="false"
             android:layout_centerInParent="true"
@@ -28,6 +21,15 @@
             android:id="@+id/tx"
             android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    <TextView
+            android:id="@+id/tx1"
+            android:textSize="25sp"
+            android:textColor="@color/white"
+            android:text="ให้คุกกี้ทำนายกัน"
+            android:layout_centerInParent="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
